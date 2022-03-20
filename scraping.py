@@ -97,6 +97,74 @@ def mars_facts():
     # Convert dataframe into HTML format, add bootstrap
     return df.to_html(classes="table table-striped")
 
+def hemisphere_image(browser):
+        # Visit the URL 
+    url = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
+    browser.visit(url)
+
+    # Create a list for holding image and titles
+    hemisphere_image_urls = []
+
+    # Parse html
+    html = browser.html
+    hemisphere_soup = soup(html, 'html.parser')
+
+    try:
+        hemi_picture = len(hemisphere_soup.select("div.item"))
+
+        # for loop over the link of each sample picture
+        for i in range(hemi_picture):
+    
+            # Create an empty dict to hold the search results
+            hemi_results = {}
+            
+            # a) click on each hemisphere link 
+            link_image = hemisphere_soup.select("div.description a")[i].get('href')
+            browser.visit(f'https://astrogeology.usgs.gov{link_image}')
+            
+            # b) Parse the html 
+            html = browser.html
+            sample_image_soup = soup(html, 'html.parser')
+            
+            # c) Retrieve the full reso image
+            img_url = sample_image_soup.select_one("div.downloads ul li a").get('href')
+            
+            # Save image title
+            img_title = sample_image_soup.select_one("h2.title").get_text()
+            
+            # Add URL and image to the string
+            hemi_results = {
+                'img_url': img_url,
+                'title': img_title}
+            
+            # Append results dict to hemisphere image urls list
+            hemisphere_image_urls.append(hemi_results)
+            
+            # Return to main page
+            browser.back()
+
+    except BaseException:
+        return None
+
+        # Return dictionary
+        return hemisphere_image_urls
+
+if __name__ == "__main__":
+    # If running as script, print scraped data
+    print(scrape_all())
+
+
+
+
+
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
 
     # If running as script, print scraped data
